@@ -2,47 +2,84 @@ import { Component } from 'react'
 import { ToastContainer } from 'react-toastify'
 import Searchbar from './components/Searchbar'
 import ImageGallery from './components/ImageGallery'
-// import 'react-toastify/dist/ReactToastify.css'
-// const axios = require('axios')
+import Button from './components/Button'
+import Loader from './components/Loader'
+import Modal from './components/Modal'
 
 export default class App extends Component {
   state = {
-    image: '',
-    newImage: null,
+    image: [],
+    searchImage: null,
+    page: 1,
+    loading: false,
+    error: null,
+    showModal: false,
+    largeImage: '',
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.image !== this.state.image) {
+    if (
+      prevState.searchImage !== this.state.searchImage ||
+      prevState.page !== this.state.page
+    ) {
+      this.setState({ loading: true })
       fetch(
-        `https://pixabay.com/api/?q=${this.state.image}&page=1&key=21790462-d81f7d941fc30814a1e9b910b&image_type=photo&orientation=horizontal&per_page=12`,
+        `https://pixabay.com/api/?q=${this.state.searchImage}&page=${this.state.page}&key=21790462-d81f7d941fc30814a1e9b910b&image_type=photo&orientation=horizontal&per_page=12`,
       )
-        .then((r) => r.json())
-        .then((newImage) => this.setState({ newImage }))
-      //   console.log(this.state.newImage)
+        .then((response) => {
+          if (response.ok) {
+            return response.json()
+          }
+          return Promise.reject(
+            new Error(`Word ${this.state.searchImage} is not exist`),
+          )
+        })
+
+        .then((data) =>
+          this.setState((prevState) => ({
+            image: [...prevState.image, ...data.hits],
+          })),
+        )
+        .catch((error) => this.setState({ error }))
+        .finally(() => this.setState({ loading: false }))
     }
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    })
   }
 
-  onFormSubmit = (image) => {
-    this.setState({ image })
-    // this.setState({ img })
+  onClickLoadMore = () => {
+    this.setState((prevState) => ({ page: prevState.page + 1 }))
+  }
+
+  modalShow = (data) => {
+    this.setState({ showModal: true, largeImage: data })
+  }
+
+  modalHide = () => {
+    this.setState({ showModal: false })
+  }
+
+  onFormSubmit = (img) => {
+    this.setState({ searchImage: img, page: 1, image: [] })
   }
   render() {
+    const { image, loading, error, showModal, largeImage } = this.state
     return (
       <div className="app">
+        {error && <h1>{error.message}</h1>}
+
         <Searchbar onSubmit={this.onFormSubmit} />
-        <ImageGallery
-          //   images={this.state.image}
-          searchQuery={this.state.newImage}
-        />
+        <ImageGallery searchQuery={image} onClick={this.modalShow} />
+        {image.length !== 0 && (
+          <Button text="Load more" onClick={this.onClickLoadMore} />
+        )}
+        {loading && <Loader />}
+        {showModal && <Modal onClose={this.modalHide} onOpen={largeImage} />}
+
         <ToastContainer position="top-center" autoClose={2000} />
       </div>
     )
   }
-}
-
-{
-  /* //     {this.state.loading && <div>Загружаем...</div>}
-      //     {this.state.images && (
-      //       <div>{this.state.images.hits[0].largeImageURL}</div>
-      //     )} */
 }

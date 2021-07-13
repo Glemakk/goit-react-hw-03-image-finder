@@ -1,5 +1,3 @@
-// import React from 'react'
-
 import React, { Component } from 'react'
 import { toast } from 'react-toastify'
 import {
@@ -15,9 +13,8 @@ export default class Searchbar extends Component {
     img: '',
   }
 
-  handleChange = ({ currentTarget }) => {
-    const value = currentTarget.value
-    // const name = currentTarget.name
+  handleChange = ({ target }) => {
+    const value = target.value
 
     this.setState({
       img: value.toLowerCase(),
@@ -29,7 +26,6 @@ export default class Searchbar extends Component {
 
     const { img } = this.state
     const { onSubmit } = this.props
-    // const notify = () => toast('Tap text for searching')
 
     if (img.trim() === '') {
       toast.warning('Tap some word for searching!')
@@ -66,25 +62,3 @@ export default class Searchbar extends Component {
     )
   }
 }
-
-// function Searchbar({ onSubmit }) {
-//   return (
-//     <header className="Searchbar">
-//       <form className="SearchForm" onSubmit={onSubmit}>
-//         <button type="submit" className="SearchForm-button">
-//           <span className="SearchForm-button-label">Search</span>
-//         </button>
-
-//         <input
-//           className="SearchForm-input"
-//           type="text"
-//           autocomplete="off"
-//           autofocus
-//           placeholder="Search images and photos"
-//         />
-//       </form>
-//     </header>
-//   )
-// }
-
-// export default Searchbar
