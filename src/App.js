@@ -43,10 +43,6 @@ export default class App extends Component {
         .catch((error) => this.setState({ error }))
         .finally(() => this.setState({ loading: false }))
     }
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth',
-    })
   }
 
   onClickLoadMore = () => {
@@ -65,7 +61,7 @@ export default class App extends Component {
     this.setState({ searchImage: img, page: 1, image: [] })
   }
   render() {
-    const { image, loading, error, showModal, largeImage } = this.state
+    const { image, loading, error, showModal, largeImage, page } = this.state
     return (
       <div className="app">
         {error && <h1>{error.message}</h1>}
@@ -73,7 +69,12 @@ export default class App extends Component {
         <Searchbar onSubmit={this.onFormSubmit} />
         <ImageGallery searchQuery={image} onClick={this.modalShow} />
         {image.length !== 0 && (
-          <Button text="Load more" onClick={this.onClickLoadMore} />
+          <Button
+            text="Load more"
+            page={page}
+            onClick={this.onClickLoadMore}
+            showModal={showModal}
+          />
         )}
         {loading && <Loader />}
         {showModal && <Modal onClose={this.modalHide} onOpen={largeImage} />}
